@@ -94,9 +94,33 @@ void initRenderPipelineAndBuffers() {
     wgpu::ShaderModuleDescriptor smDesc{};
     smDesc.nextInChain = &wgslDesc;
     shaderModule = device.CreateShaderModule(&smDesc);
-
+    
     //---------------------------------------
-    // render pipelineのセットアップ
+    // bufferの作成
+    //---------------------------------------
+    // 頂点情報（座標と頂点色）
+    // 座標系はDirectXと同じY-Up
+    Vertex const vertData[] = {
+        {  0.8f, -0.8f, 0.0f, 1.0f, 0.0f },     // 右下
+        { -0.8f, -0.8f, 0.0f, 0.0f, 1.0f },     // 左下
+        { -0.0f,  0.8f, 1.0f, 0.0f, 0.0f },     // 上
+    };
+    // 頂点インデックス情報
+    uint16_t const indxData[] = {
+        0, 1, 2
+        , 0 // padding。各バッファのサイズは4byteの倍数である必要がある。
+    };
+
+    // vertex buffer
+    vertexBuffer = createBuffer(vertData, sizeof(vertData), wgpu::BufferUsage::Vertex);
+    // index buffer
+    indexBuffer = createBuffer(indxData, sizeof(indxData), wgpu::BufferUsage::Index);
+    // Uniform buffer
+    uniformBuffer = createBuffer(&ubObject, sizeof(ubObject), wgpu::BufferUsage::Uniform);
+    
+    //---------------------------------------
+    // uniformBufferについての
+    // group layoutとbind group
     //---------------------------------------
     // bind group layout
     // bind groupの抽象的な情報。render pipelineに覚えてもらうために、ここで作成＆登録する。
@@ -111,7 +135,25 @@ void initRenderPipelineAndBuffers() {
     bglDesc.entries = &bglEntry;
     wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
 
-    // render pipeline
+    // bind group
+    wgpu::BindGroupEntry bgEntry = {};
+    bgEntry.binding = 0;
+    bgEntry.buffer = uniformBuffer;
+    bgEntry.offset = 0;
+    bgEntry.size = sizeof(ubObject);
+
+    wgpu::BindGroupDescriptor bgDesc;
+    bgDesc.layout = bgl;
+    bgDesc.entryCount = 1;
+    bgDesc.entries = &bgEntry;
+    device.CreateBindGroup(&bgDesc);
+
+    bindGroup = device.CreateBindGroup(&bgDesc);
+
+    //---------------------------------------
+    // render pipelineの作成
+    //---------------------------------------
+    // PipelineLayoutDescriptor（bindGroupLayoutをまとめたもの）
     wgpu::PipelineLayoutDescriptor pllDesc{};
     pllDesc.bindGroupLayoutCount = 1;
     pllDesc.bindGroupLayouts = &bgl;
@@ -150,11 +192,12 @@ void initRenderPipelineAndBuffers() {
     fragmentState.entryPoint = "main_f";
     fragmentState.targetCount = 1;
     fragmentState.targets = &colorTargetState;
-    
+
+    // DepthStencilState
     wgpu::DepthStencilState depthStencilState{};
     depthStencilState.format = wgpu::TextureFormat::Depth32Float;
 
-    // pipeline
+    // render pipelineの作成
     wgpu::RenderPipelineDescriptor descriptor{};
     descriptor.layout = device.CreatePipelineLayout(&pllDesc);
     descriptor.vertex = vertexState;
@@ -164,48 +207,9 @@ void initRenderPipelineAndBuffers() {
     descriptor.primitive.cullMode = wgpu::CullMode::Back;   // カリングする面（表裏）
     descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
     descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Undefined;
-
     descriptor.depthStencil = &depthStencilState;
 
     pipeline = device.CreateRenderPipeline(&descriptor);
-
-    //---------------------------------------
-    // bufferの作成
-    //---------------------------------------
-    // 頂点情報（座標と頂点色）
-    // 座標系はDirectXと同じY-Up
-    Vertex const vertData[] = {
-        {  0.8f, -0.8f, 0.0f, 1.0f, 0.0f },     // 右下
-        { -0.8f, -0.8f, 0.0f, 0.0f, 1.0f },     // 左下
-        { -0.0f,  0.8f, 1.0f, 0.0f, 0.0f },     // 上
-    };
-    uint16_t const indxData[] = {
-        0, 1, 2
-        , 0 // padding。各バッファのサイズは4byteの倍数である必要がある。
-    };
-
-    // vertex buffer
-    vertexBuffer = createBuffer(vertData, sizeof(vertData), wgpu::BufferUsage::Vertex);
-    // index buffer
-    indexBuffer = createBuffer(indxData, sizeof(indxData), wgpu::BufferUsage::Index);
-
-    // Uniform buffer
-    uniformBuffer = createBuffer(&ubObject, sizeof(ubObject), wgpu::BufferUsage::Uniform);
-
-    // bind group
-    wgpu::BindGroupEntry bgEntry = {};
-    bgEntry.binding = 0;
-    bgEntry.buffer = uniformBuffer;
-    bgEntry.offset = 0;
-    bgEntry.size = sizeof(ubObject);
-
-    wgpu::BindGroupDescriptor bgDesc;
-    bgDesc.layout = bgl;
-    bgDesc.entryCount = 1;
-    bgDesc.entries = &bgEntry;
-    device.CreateBindGroup(&bgDesc);
-
-    bindGroup = device.CreateBindGroup(&bgDesc);
 }
 
 void initSwapChain() {
