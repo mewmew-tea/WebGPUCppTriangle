@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "files.associations": {
+        "xstring": "cpp"
+    },
+}

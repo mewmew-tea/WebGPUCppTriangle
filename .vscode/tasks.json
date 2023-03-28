@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "em++: build and serve",
+            "type": "shell",
+            "command": "C:/Tools/emsdk/emsdk_env.bat & em++ ${file} -s USE_WEBGPU=1 -s WASM=1 -o index.html & echo http://localhost:8000/index.html | clip & python -m http.server 8000",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ]
+}
