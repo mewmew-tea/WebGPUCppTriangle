@@ -191,6 +191,7 @@ void initRenderPipelineAndBuffers() {
     // DepthStencilState
     wgpu::DepthStencilState depthStencilState{};
     depthStencilState.format = wgpu::TextureFormat::Depth32Float;
+    depthStencilState.depthWriteEnabled = true;
 
     // render pipelineの作成
     wgpu::PipelineLayoutDescriptor pllDesc{}; // bindGroupLayoutをまとめたもの
