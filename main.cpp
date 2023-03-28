@@ -153,11 +153,6 @@ void initRenderPipelineAndBuffers() {
     //---------------------------------------
     // render pipelineの作成
     //---------------------------------------
-    // PipelineLayoutDescriptor（bindGroupLayoutをまとめたもの）
-    wgpu::PipelineLayoutDescriptor pllDesc{};
-    pllDesc.bindGroupLayoutCount = 1;
-    pllDesc.bindGroupLayouts = &bgl;
-
     // vertex
     wgpu::VertexAttribute vertAttrs[2] = {};
     vertAttrs[0].format = wgpu::VertexFormat::Float32x2;
@@ -198,6 +193,9 @@ void initRenderPipelineAndBuffers() {
     depthStencilState.format = wgpu::TextureFormat::Depth32Float;
 
     // render pipelineの作成
+    wgpu::PipelineLayoutDescriptor pllDesc{}; // bindGroupLayoutをまとめたもの
+    pllDesc.bindGroupLayoutCount = 1;
+    pllDesc.bindGroupLayouts = &bgl;
     wgpu::RenderPipelineDescriptor descriptor{};
     descriptor.layout = device.CreatePipelineLayout(&pllDesc);
     descriptor.vertex = vertexState;
