@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches: 
+    - "master"
+  pull_request:
+    branches: 
+    - "master"
+    
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy to local files and github pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+              
+      - name: Setup Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install sdk-3.1.30-64bit
+          ./emsdk activate sdk-3.1.30-64bit
+           
+      #--------------------------
+      # build and deploy to github io
+      #--------------------------
+      - name: github io build
+        run: |
+          source ${{github.workspace}}/emsdk/emsdk_env.sh
+          mkdir out
+          em++ main.cpp -s USE_WEBGPU=1 -s WASM=1 -o ./out/index.html
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: './out/'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+        
