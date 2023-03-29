@@ -38,7 +38,7 @@ jobs:
         run: |
           source ${{github.workspace}}/emsdk/emsdk_env.sh
           mkdir out
-          em++ main.cpp -s USE_WEBGPU=1 -s WASM=1 -o ./out/index.html
+          em++ main.cpp -s USE_WEBGPU=1 -s WASM=1 --shell-file ./resources/shell.html -o ./out/index.html
           
       - name: Setup Pages
         uses: actions/configure-pages@v2
