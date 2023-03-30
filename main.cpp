@@ -171,14 +171,14 @@ void initRenderPipelineAndBuffers() {
     vertexState.bufferCount = 1;
     vertexState.buffers = &vertexBufferLayout;
 
-    // fragment
+    // fragment and blendState
     wgpu::BlendState blend = {};
     blend.color.operation = wgpu::BlendOperation::Add;
-    blend.color.srcFactor = wgpu::BlendFactor::One;
-    blend.color.dstFactor = wgpu::BlendFactor::One;
+    blend.color.srcFactor = wgpu::BlendFactor::SrcAlpha;
+    blend.color.dstFactor = wgpu::BlendFactor::OneMinusDstAlpha;
     blend.alpha.operation = wgpu::BlendOperation::Add;
     blend.alpha.srcFactor = wgpu::BlendFactor::One;
-    blend.alpha.dstFactor = wgpu::BlendFactor::One;
+    blend.alpha.dstFactor = wgpu::BlendFactor::OneMinusDstAlpha;
     wgpu::ColorTargetState colorTargetState{};
     colorTargetState.format = wgpu::TextureFormat::BGRA8Unorm;
     colorTargetState.blend = &blend;
