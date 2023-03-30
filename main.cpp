@@ -190,8 +190,9 @@ void initRenderPipelineAndBuffers() {
 
     // DepthStencilState
     wgpu::DepthStencilState depthStencilState{};
-    depthStencilState.format = wgpu::TextureFormat::Depth32Float;
+    depthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     depthStencilState.depthWriteEnabled = true;
+    depthStencilState.depthCompare = wgpu::CompareFunction::Less;
 
     // render pipelineの作成
     wgpu::PipelineLayoutDescriptor pllDesc{}; // bindGroupLayoutをまとめたもの
@@ -231,18 +232,18 @@ void initSwapChain() {
     swapChain = device.CreateSwapChain(surface, &scDesc);
 }
 
-void initDepthStencilView() {
-    // DepthStencilView作成
+void initDepthStencil() {
+    // DepthStencil作成
     wgpu::TextureDescriptor descriptor{};
     descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     descriptor.size = {kWidth, kHeight, 1};
-    descriptor.format = wgpu::TextureFormat::Depth32Float;
+    descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
     canvasDepthStencilView = device.CreateTexture(&descriptor).CreateView();
 }
 
 
 void frame() {
-    // バックバッファとDepthStencilViewのクリア
+    // バックバッファとDepthStencilのクリア
     wgpu::TextureView backbuffer = swapChain.GetCurrentTextureView();
     wgpu::RenderPassColorAttachment attachment{};
     attachment.view = backbuffer;
@@ -256,10 +257,12 @@ void frame() {
 
     wgpu::RenderPassDepthStencilAttachment depthStencilAttachment = {};
     depthStencilAttachment.view = canvasDepthStencilView;
-    depthStencilAttachment.depthClearValue = 0;
+    depthStencilAttachment.depthClearValue = 1.0f;
     depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Clear;
     depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
-
+    depthStencilAttachment.stencilClearValue = 0;
+    depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Clear;
+    depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
     renderpass.depthStencilAttachment = &depthStencilAttachment;
 
     wgpu::CommandBuffer commands;
@@ -300,7 +303,7 @@ void run() {
 
     initRenderPipelineAndBuffers();
     initSwapChain();
-    initDepthStencilView();
+    initDepthStencil();
 
     // メインループ設定
     emscripten_set_main_loop(frame, 0, false);
