@@ -36,8 +36,8 @@ const char shaderCode[] = R"(
     };
     struct UbObject
     {
-        Pos : vec3<f32>,
-        Padding : f32,
+        Pos : vec2<f32>,
+        Padding : vec2<f32>,
     };
     @group(0) @binding(0) var<uniform> ubObject : UbObject;
 
