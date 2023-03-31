@@ -146,8 +146,6 @@ void initRenderPipelineAndBuffers() {
     bgDesc.layout = bgl;
     bgDesc.entryCount = 1;
     bgDesc.entries = &bgEntry;
-    device.CreateBindGroup(&bgDesc);
-
     bindGroup = device.CreateBindGroup(&bgDesc);
 
     //---------------------------------------
