@@ -54,6 +54,8 @@ const char shaderCode[] = R"(
     }
 )";
 
+wgpu::Instance instance;
+
 wgpu::Device device;
 wgpu::Queue queue;
 wgpu::Buffer readbackBuffer;
@@ -89,7 +91,7 @@ void initRenderPipelineAndBuffers() {
     wgpu::ShaderModule shaderModule{};
 
     wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
-    wgslDesc.source = shaderCode;
+    wgslDesc.code = shaderCode;
 
     wgpu::ShaderModuleDescriptor smDesc{};
     smDesc.nextInChain = &wgslDesc;
@@ -217,7 +219,6 @@ void initSwapChain() {
 
     wgpu::SurfaceDescriptor surfDesc{};
     surfDesc.nextInChain = &canvasDesc;
-    wgpu::Instance instance{};  // null instance
     surface = instance.CreateSurface(&surfDesc);
 
     // SwapChain作成
@@ -308,10 +309,11 @@ void run() {
 }
 
 void getDevice(void (*callback)(wgpu::Device)) {
-    // Left as null (until supported in Emscripten)
-    static const WGPUInstance instance = nullptr;
+    // instanceの作成
+    WGPUInstance wgpuInstance = wgpuCreateInstance(nullptr);
+    instance = wgpu::Instance::Acquire(wgpuInstance);
 
-    wgpuInstanceRequestAdapter(instance, nullptr, [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message, void* userdata) {
+    wgpuInstanceRequestAdapter(wgpuInstance, nullptr, [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message, void* userdata) {
         if (message) {
             printf("wgpuInstanceRequestAdapter: %s\n", message);
         }

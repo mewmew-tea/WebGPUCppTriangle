@@ -28,8 +28,8 @@ jobs:
         run: |
           git clone https://github.com/emscripten-core/emsdk.git
           cd emsdk
-          ./emsdk install sdk-3.1.30-64bit
-          ./emsdk activate sdk-3.1.30-64bit
+          ./emsdk install sdk-3.1.50-64bit
+          ./emsdk activate sdk-3.1.50-64bit
            
       #--------------------------
       # build and deploy to github io
